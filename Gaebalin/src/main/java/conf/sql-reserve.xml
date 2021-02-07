@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				  "dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reserve">
+	<resultMap id="reserveResult" type="reserve">
+		<result property="reserveNo" column="RESERVE_NO" />
+		<result property="eventNo" column="EVENT_NO" />
+		<result property="userCode" column="USER_CODE" />
+		<result property="reservePrice" column="RESERVE_PRICE" />
+		<result property="reservePop" column="RESERVE_POP" />
+		<result property="reserveYn" column="RESERVE_YN" />
+		<result property="reserveSellYn" column="RESERVE_SELL_YN" />
+		<result property="reserveDate" column="RESERVE_DATE" />
+	</resultMap>
+
+	<insert id="createReserve" parameterType="map">
+		<![CDATA[
+			INSERT INTO TB_RESERVE(
+			  RESERVE_NO
+			, EVENT_NO
+			, USER_CODE
+			, RESERVE_PRICE
+			, RESERVE_POP
+			, RESERVE_DATE
+			) VALUES (
+			  'R' || LPAD(SELL_SEQ.NEXTVAL, 6, 0)
+			, #{eventNo}
+			, #{userCode}
+			, #{reservePrice}
+			, #{reservePop}
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+			)
+		]]>
+	</insert>
+
+	<select id="retrieveReserveListForM" resultType="map" parameterType="map">
+		<![CDATA[
+			/*	retrieveReserveListForM	*/
+			SELECT RESERVE.RESERVE_NO
+			     , RESERVE.USER_CODE
+			     , RESERVE.EVENT_NO
+			     , RESERVE.RESERVE_PRICE
+			     , RESERVE.RESERVE_POP
+			     , RESERVE.RESERVE_YN
+			     , RESERVE.RESERVE_SELL_YN
+			FROM   TB_RESERVE RESERVE
+			WHERE 1=1
+			]]>
+			ORDER BY RESERVE.RESERVE_DATE DESC
+	</select>
+
+	<select id="retrieveReserveList" parameterType="map" resultType="map">
+		<![CDATA[
+			SELECT T.RESERVE_NO
+			     , T.EVENT_NO
+			     , T.USER_CODE
+			     , T.RESERVE_PRICE
+			     , T.RESERVE_POP
+			     , T.RESERVE_DATE
+			     , T.RESERVE_YN
+			     , T.RESERVE_SELL_YN
+			     , T.EVENT_CATEGORY_CD
+			     , T.EVENT_IMAGE
+			     , T.EVENT_TITLE
+			     , T.EVENT_UNIT_PRICE
+			     , T.NICK_NAME
+				 , T.EMAIL
+				 , T.PHONE_NUM
+				 , T.POST_NUM
+				 , T.ADDRESS
+			FROM
+			(
+				SELECT RESERVE.RESERVE_NO
+					 , RESERVE.EVENT_NO
+					 , RESERVE.USER_CODE
+					 , RESERVE.RESERVE_PRICE
+					 , RESERVE.RESERVE_POP
+					 , RESERVE.RESERVE_DATE
+					 , RESERVE.RESERVE_YN
+					 , RESERVE.RESERVE_SELL_YN
+					 , EVENT.EVENT_CATEGORY_CD
+					 , EVENT.EVENT_IMAGE
+					 , EVENT.EVENT_TITLE
+					 , EVENT.EVENT_UNIT_PRICE
+					 , TB_COM_USER.NICK_NAME
+					 , TB_COM_USER.EMAIL
+					 , TB_COM_USER.PHONE_NUM
+					 , TB_COM_USER.POST_NUM
+					 , TB_COM_USER.ADDRESS
+				FROM   TB_RESERVE RESERVE
+				INNER JOIN TB_EVENT EVENT ON
+					  EVENT.EVENT_NO = RESERVE.EVENT_NO
+				INNER JOIN TB_COM_USER ON
+						RESERVE.USER_CODE = TB_COM_USER.USER_CODE
+	 			WHERE  1=1
+				AND    TB_COM_USER.USER_CODE = #{userCode}
+				ORDER BY RESERVE_DATE DESC
+			) T
+		]]>
+	</select>
+	
+	<select id="retrieveReserveReply" parameterType="map" resultType="map">
+		<![CDATA[
+			/* retrieveReserveReply */
+			SELECT T.EVENT_NO
+				, T.RESERVE_NO
+				, T.MARK_YN
+				, T.RESERVE_SELL_YN
+				FROM
+				(
+					SELECT RESERVE.EVENT_NO
+						, RESERVE.RESERVE_NO
+						, (CASE WHEN (SELECT MARK_RATING FROM TB_EVENT_MARK WHERE 1=1 AND EVENT_NO = #{eventNo} AND USER_CODE = #{userCode}) IS NULL THEN 'N' ELSE 'Y' END) AS MARK_YN
+				     	, RESERVE.RESERVE_SELL_YN
+				     	FROM TB_RESERVE RESERVE
+				     	WHERE 1=1
+						AND USER_CODE = #{userCode}
+						AND EVENT_NO = #{eventNo}
+						ORDER BY RESERVE_SELL_YN DESC) T
+				WHERE ROWNUM = 1
+				]]>
+	</select>
+	
+	<select id="retrieveReserve" parameterType="map" resultType="map">
+		/*	retrieveReserve	*/
+		SELECT RESERVE.RESERVE_NO
+		     , RESERVE.RESERVE_PRICE
+		     , RESERVE.RESERVE_POP
+		     , RESERVE.EVENT_NO
+		     , EVENT.EVENT_TITLE
+		     , EVENT.EVENT_UNIT_PRICE
+		     , EVENT.EVENT_DATE
+		     , EVENT.EVENT_LOC
+		     , (EVENT.EVENT_MAX_POP - EVENT.EVENT_CUR_POP) AS EVENT_COUNT
+		     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0103' AND COMM_CD = EVENT.EVENT_TIME_CD) AS EVENT_TIME_CD_NM
+		FROM   TB_RESERVE RESERVE
+		INNER JOIN TB_EVENT EVENT ON
+			EVENT.EVENT_NO = RESERVE.EVENT_NO
+		WHERE 1=1
+		AND  RESERVE.RESERVE_NO = #{reserveNo}
+	</select>
+	
+	<select id="retrieveMaxReserveNo" resultType="string">
+		<![CDATA[
+			SELECT T.RESERVE_NO
+			FROM
+			(
+			  SELECT RESERVE_NO
+			  FROM TB_RESERVE
+			  ORDER BY RESERVE_DATE DESC
+			) T
+			WHERE ROWNUM = 1
+		]]>
+	</select>
+	<update id="updateReserveYn" parameterType="map">
+		<![CDATA[
+			/* updateReserveYn */
+			UPDATE TB_RESERVE
+			SET RESERVE_YN           = 'Y'
+			WHERE RESERVE_NO = #{reserveNo}
+		]]>
+	</update>
+
+	<update id="updateReserveSellYn" parameterType="map">
+		<![CDATA[
+			/* updateReserveSellYn */
+			UPDATE TB_RESERVE
+			SET RESERVE_SELL_YN           = 'Y'
+			WHERE RESERVE_NO = #{reserveNo}
+		]]>
+	</update>
+	
+	<update id="updateReserveReviewYn" parameterType="map">
+		<![CDATA[
+			/* updateReserveReviewYn */
+			UPDATE TB_RESERVE
+			SET RESERVE_SELL_YN           = 'A'
+			WHERE RESERVE_NO = #{reserveNo}
+		]]>
+	</update>
+	
+	<update id="updateReserve" parameterType="map">
+		/*	updateReserve	*/
+		UPDATE TB_RESERVE
+		SET RESERVE_PRICE       = #{reservePrice}
+		, RESERVE_POP        = #{reservePop}
+		, RESERVE_YN  = 'N'
+		WHERE 1=1
+		AND RESERVE_NO = #{reserveNo}
+		AND EVENT_NO = #{eventNo}
+	</update>
+	
+	<delete id="deleteReserve" parameterType="map">
+		<![CDATA[
+			DELETE
+			FROM  TB_RESERVE
+			WHERE RESERVE_NO = #{reserveNo}
+		]]>
+	</delete>
+
+</mapper>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				  "dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cart">
+	<resultMap id="cartResult" type="cart">
+		<result property="cartCode" column="CART_CODE" />
+		<result property="productCode" column="PRODUCT_CODE" />
+		<result property="userCode" column="USER_CODE" />
+		<result property="cartPrice" column="CART_PRICE" />
+		<result property="cartCount" column="CART_COUNT" />
+		<result property="cartDate" column="CART_DATE" />
+		<result property="checkYn" column="CHECK_YN" />
+	</resultMap>
+
+	<insert id="createCart" parameterType="map">
+		<![CDATA[
+			INSERT INTO TB_CART(
+			  CART_CODE
+			, PRODUCT_CODE
+			, USER_CODE
+			, CART_PRICE
+			, CART_COUNT
+			, CART_DATE
+			) VALUES (
+			  'C' || LPAD(CART_SEQ.NEXTVAL, 6, 0)
+			, #{productCode}
+			, #{userCode}
+			, #{cartPrice}
+			, #{cartCount}
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+			)
+		]]>
+	</insert>
+
+	<select id="retrieveCartList" parameterType="map" resultType="map">
+		<![CDATA[
+			SELECT CART.CART_CODE
+				 , CART.PRODUCT_CODE
+				 , CART.USER_CODE
+				 , CART.CART_PRICE
+				 , CART.CART_COUNT
+				 , CART.CART_DATE
+				 , PRODUCT.PRODUCT_CATEGORY_CD
+				 , PRODUCT.PRODUCT_IMAGE
+				 , PRODUCT.PRODUCT_NAME
+				 , PRODUCT.PRODUCT_UNIT_PRICE
+				 , TB_COM_USER.NICK_NAME
+				 , TB_COM_USER.EMAIL
+				 , TB_COM_USER.PHONE_NUM
+				 , TB_COM_USER.POST_NUM
+				 , TB_COM_USER.ADDRESS
+			FROM   TB_CART CART
+			INNER JOIN TB_PRODUCT PRODUCT ON
+				  PRODUCT.PRODUCT_CODE = CART.PRODUCT_CODE
+			INNER JOIN TB_COM_USER ON
+				  CART.USER_CODE = TB_COM_USER.USER_CODE
+			WHERE  1=1
+			AND    CART.USER_CODE = #{userCode}
+		]]>
+	</select>
+
+	<select id="retrieveCartListForBuy" parameterType="map" resultType="map">
+		<![CDATA[
+			SELECT CART.CART_CODE
+				 , CART.PRODUCT_CODE
+				 , CART.USER_CODE
+				 , CART.CART_PRICE
+				 , CART.CART_COUNT
+				 , CART.CART_DATE
+				 , PRODUCT.PRODUCT_CATEGORY_CD
+				 , PRODUCT.PRODUCT_IMAGE
+				 , PRODUCT.PRODUCT_NAME
+				 , PRODUCT.PRODUCT_UNIT_PRICE
+				 , TB_COM_USER.NICK_NAME
+				 , TB_COM_USER.EMAIL
+				 , TB_COM_USER.PHONE_NUM
+				 , TB_COM_USER.POST_NUM
+				 , TB_COM_USER.ADDRESS
+			FROM   TB_CART CART
+			INNER JOIN TB_PRODUCT PRODUCT ON
+				  PRODUCT.PRODUCT_CODE = CART.PRODUCT_CODE
+			INNER JOIN TB_COM_USER ON
+				  CART.USER_CODE = TB_COM_USER.USER_CODE
+			WHERE  1=1
+			AND    CART.USER_CODE = #{userCode}
+			AND    CART.CHECK_YN = 'Y'
+		]]>
+	</select>
+	
+	<select id="retrieveCart" parameterType="map" resultType="map">
+		<![CDATA[
+			SELECT T.USER_CODE
+			, T.TOTAL_PRICE
+			, T.TOTAL_COUNT
+			, T.COUNTING
+			, TB_COM_USER.NICK_NAME
+			, TB_COM_USER.EMAIL
+			, TB_COM_USER.PHONE_NUM
+			, TB_COM_USER.POST_NUM
+			, TB_COM_USER.ADDRESS
+			FROM (SELECT CART.USER_CODE 
+			, SUM(CART.CART_PRICE) AS TOTAL_PRICE
+			, SUM(CART.CART_COUNT) AS TOTAL_COUNT
+			, COUNT(CART.CART_PRICE) AS COUNTING
+			FROM TB_CART CART
+			WHERE 1=1
+			GROUP BY CART.USER_CODE) T
+			INNER JOIN TB_COM_USER ON
+					T.USER_CODE = TB_COM_USER.USER_CODE
+			WHERE 1=1
+			AND T.USER_CODE = #{userCode}
+		]]>
+	</select>
+	
+	<select id="cartInfo" parameterType="string" resultMap="cartResult">
+		<![CDATA[
+			SELECT CART_CODE
+				 , PRODUCT_CODE
+				 , CART_COUNT
+			FROM   TB_CART
+			WHERE CART_CODE = #{cartCode}
+		]]>
+	</select>
+
+	<delete id="deleteCart" parameterType="map">
+		<![CDATA[
+			DELETE
+			FROM  TB_CART
+			WHERE CART_CODE = #{cartCode}
+		]]>
+	</delete>
+	
+	<update id="updateCheckYn" parameterType="map">
+		<![CDATA[
+			/* updateCheckYn */
+			UPDATE TB_CART
+			SET CHECK_YN           = 'Y'
+			WHERE CART_CODE = #{cartCode}
+		]]>
+	</update>
+	
+	<update id="resetCheckYn" parameterType="map">
+		<![CDATA[
+			/* resetCheckYn */
+			UPDATE TB_CART
+			SET CHECK_YN           = 'N'
+			WHERE USER_CODE = #{userCode}
+		]]>
+	</update>
+
+</mapper>

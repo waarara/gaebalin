@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				  "dtd/mybatis-3-mapper.dtd">
+<mapper namespace="eventreply">
+	<resultMap id="eventreplyResult" type="eventreply">
+		<result property="eventNo" column="EVENT_NO" />
+		<result property="userCode" column="USER_CODE" />
+		<result property="userReplyNo" column="USER_REPLY_NO" />
+		<result property="userReply" column="USER_REPLY" />
+		<result property="replyDate" column="REPLY_DATE" />
+	</resultMap>
+
+	<select id="retrieveEventReplyList" parameterType="map" resultType="map">
+		<![CDATA[
+		/*	retrieveReplyList	*/
+			SELECT REPLY.EVENT_NO
+				 , REPLY.USER_CODE
+				 , (SELECT ID FROM TB_COM_USER WHERE USER_CODE = REPLY.USER_CODE) AS USER_ID
+				 , REPLY.USER_REPLY_NO
+				 , REPLY.USER_REPLY
+				 , REPLY.REPLY_DATE
+				 , (SELECT COUNT(*) FROM TB_EVENT_REPLY WHERE EVENT_NO = #{eventNo}) AS REPLY_COUNT
+				 , (SELECT USER_IMAGE FROM TB_COM_USER WHERE USER_CODE = REPLY.USER_CODE) AS USER_IMAGE
+				 , (SELECT MARK_RATING FROM TB_EVENT_MARK WHERE 1=1 AND EVENT_NO = #{eventNo} AND USER_CODE = REPLY.USER_CODE) AS MARK_RATING
+			FROM   TB_EVENT_REPLY REPLY
+			WHERE  1=1
+			AND    EVENT_NO = #{eventNo}
+			ORDER BY REPLY.REPLY_DATE DESC
+		]]>
+	</select>
+
+	<select id="retrieveEventReply" parameterType="map" resultType="map">
+		<![CDATA[
+		/*	retrieveReply	*/
+			SELECT REPLY.EVENT_NO
+				 , REPLY.USER_CODE
+				 , (SELECT ID FROM TB_COM_USER WHERE USER_CODE = REPLY.USER_CODE) AS USER_ID
+				 , REPLY.USER_REPLY_NO
+				 , REPLY.USER_REPLY
+				 , REPLY.REPLY_DATE
+				 , (SELECT COUNT(*) FROM TB_EVENT_REPLY WHERE EVENT_NO = #{eventNo}) AS REPLY_COUNT
+				 , (SELECT USER_IMAGE FROM TB_COM_USER WHERE USER_CODE = REPLY.USER_CODE) AS USER_IMAGE
+			FROM   TB_EVENT_REPLY REPLY
+			WHERE  1=1
+			AND    EVENT_NO = #{eventNo}
+			AND    USER_CODE = #{userCode}
+		]]>
+	</select>
+
+	<insert id="createEventReply" parameterType="map">
+		<![CDATA[
+		/*	createReply	*/
+			INSERT INTO TB_EVENT_REPLY(
+			  EVENT_NO
+			, USER_CODE
+			, USER_REPLY_NO
+			, USER_REPLY
+			, REPLY_DATE
+			) VALUES (
+			  #{eventNo}
+			, #{userCode}
+			, (SELECT NVL(MAX(USER_REPLY_NO), 0) + 1 FROM TB_EVENT_REPLY WHERE 1=1 AND EVENT_NO = #{eventNo} AND USER_CODE = #{userCode})
+			, #{userReply}
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+			)
+		]]>
+	</insert>
+
+	<delete id="deleteEventReply" parameterType="map">
+		<![CDATA[
+		/*	deleteReply	*/
+			DELETE
+			FROM  TB_EVENT_REPLY
+			WHERE 1=1
+			AND EVENT_NO = #{eventNo}
+			AND USER_CODE = #{userCode}
+			AND USER_REPLY_NO = #{userReplyNo}
+		]]>
+	</delete>
+</mapper>

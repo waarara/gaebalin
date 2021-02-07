@@ -1,0 +1,38 @@
+@charset "euc-kr";
+
+/* 기본 태그 CSS 적용*/
+html, body {padding:0;margin:0;}
+body, td, select, textarea, input {font-size:12px;}
+
+/* margin, padding reset(초기화) */
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, p, blockquote, th, td {margin:0;padding:0;}
+
+/* heading fonts size reset(초기화) */
+h1, h2, h3, h4, h5, h6 {font-size:100%;}
+
+/* list style reset(초기화) */
+ol, ul {list-style:none;}
+
+/* table style reset(초기화) */
+table {border-collapse:collapse;border-spacing:0;table-layout:fixed;}
+
+/* fieldset 및 img 경계선 reset(초기화) */
+fieldset, img {border:0;}
+img{vertical-align:middle;}
+
+/* caption text 정렬 reset(초기화) */
+caption {text-align:left;}
+
+/* form 요소 reset (초기화) */
+select {font-size:12px;vertical-align:middle;}
+input {font-size:12px;vertical-align:middle;}
+textarea {font:12px;line-height:140%;}
+input.radio {vertical-align:middle;margin-bottom:3px;}
+
+a:link    {text-decoration:none;}
+a:active    {text-decoration:none;}
+a:visited    { text-decoration:none;}
+a:hover    { text-decoration:none;}
+
+/* hr 요소 hidden 처리 */
+hr{position:absolute;width:0;height:0;font-size:0;line-height:0;overflow:hidden;visibility:hidden;}

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				  "dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="qna">  
+ 	<resultMap id="qnaResult" type="qna">
+		<result property="qnaNo" column="QNA_NO" />
+		<result property="userCode" column="USER_CODE" />
+		<result property="qnaTitle" column="QNA_TITLE" />
+		<result property="qnaContents" column="QNA_CONTENTS" />
+		<result property="qnaDate" column="QNA_DATE" />
+		<result property="qnaCategoryCd" column="QNA_CATEGORY_CD" />
+		<result property="responseUser" column="RESPONSE_USER" />
+		<result property="qnaDepth" column="QNA_DEPTH" />
+		<result property="groupNo" column="GROUP_NO" />
+	</resultMap>
+ 
+	<select id="retrieveQnaList" parameterType="map" resultType="map">
+		<![CDATA[
+			/*	retrieveQnaList	*/
+			SELECT T.QNA_NO
+			     , T.USER_CODE
+			     , T.QNA_TITLE
+			     , T.QNA_CONTENTS
+			     , T.QNA_DATE
+			     , T.QNA_CATEGORY_CD
+			     , T.RESPONSE_USER
+			     , T.QNA_DEPTH
+			     , T.GROUP_NO
+			     , T.NICK_NAME
+				 , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0104' AND COMM_CD = T.QNA_CATEGORY_CD) AS QNA_CATEGORY_CD_NM
+				 , (SELECT MAX(QNA_DEPTH) FROM TB_QNA WHERE T.GROUP_NO = TB_QNA.GROUP_NO) AS MAX_DEPTH
+			FROM
+			(
+				SELECT QNA.QNA_NO
+					 , QNA.USER_CODE
+					 , QNA.QNA_TITLE
+					 , QNA.QNA_CONTENTS
+					 , QNA.QNA_DATE
+					 , QNA.QNA_CATEGORY_CD
+					 , QNA.RESPONSE_USER
+					 , QNA.QNA_DEPTH
+					 , QNA.GROUP_NO
+					 , TB_COM_USER.NICK_NAME
+				FROM   TB_QNA QNA
+				INNER JOIN TB_COM_USER ON
+						QNA.USER_CODE = TB_COM_USER.USER_CODE
+	 			WHERE  1=1
+				AND    QNA.RESPONSE_USER = #{userCode}
+				ORDER BY QNA.GROUP_NO ASC, QNA.QNA_DEPTH ASC
+			) T
+		]]>
+	</select>
+	
+	<select id="retrieveQnaListForM" parameterType="map" resultType="map">
+		<![CDATA[
+			/*	retrieveQnaListForM	*/
+			SELECT T.QNA_NO
+			     , T.USER_CODE
+			     , T.QNA_TITLE
+			     , T.QNA_CONTENTS
+			     , T.QNA_DATE
+			     , T.QNA_CATEGORY_CD
+			     , T.RESPONSE_USER
+			     , T.QNA_DEPTH
+			     , T.GROUP_NO
+				 , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0104' AND COMM_CD = T.QNA_CATEGORY_CD) AS QNA_CATEGORY_CD_NM
+				 , (SELECT MAX(QNA_DEPTH) FROM TB_QNA WHERE T.GROUP_NO = TB_QNA.GROUP_NO) AS MAX_DEPTH
+			FROM
+			(
+				SELECT QNA.QNA_NO
+					 , QNA.USER_CODE
+					 , QNA.QNA_TITLE
+					 , QNA.QNA_CONTENTS
+					 , QNA.QNA_DATE
+					 , QNA.QNA_CATEGORY_CD
+					 , QNA.RESPONSE_USER
+					 , QNA.QNA_DEPTH
+					 , QNA.GROUP_NO
+				FROM   TB_QNA QNA
+	 			WHERE  1=1
+				ORDER BY QNA.GROUP_NO ASC, QNA.QNA_DEPTH ASC
+			) T
+			]]>
+	</select>
+	
+	<select id="retrieveQna" parameterType="map" resultType="map">
+		<![CDATA[
+		/*	retrieveQna	*/
+			SELECT QNA.QNA_NO
+			     , QNA.USER_CODE
+			     , QNA.QNA_TITLE
+			     , QNA.QNA_CONTENTS
+			     , QNA.QNA_DATE
+				 , QNA.QNA_CATEGORY_CD
+				 , QNA.QNA_DEPTH
+				 , QNA.GROUP_NO
+  				 , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0104' AND COMM_CD = QNA.QNA_CATEGORY_CD) AS QNA_CATEGORY_CD_NM
+			FROM   TB_QNA QNA
+			WHERE 1=1
+			AND QNA.QNA_NO = #{qnaNo}
+		]]>
+	</select>
+	
+		<insert id="createQna" parameterType="qna">
+		<![CDATA[
+		/*	createBoard	*/
+			INSERT INTO TB_QNA(
+			  QNA_NO
+			, USER_CODE
+			, QNA_TITLE
+			, QNA_CONTENTS
+			, QNA_CATEGORY_CD
+			, QNA_DATE
+			, RESPONSE_USER
+			, GROUP_NO
+			) VALUES (
+			  'Q' || LPAD(QNA_SEQ.NEXTVAL, 6, 0)
+			, #{userCode}
+			, #{qnaTitle}
+			, #{qnaContents}
+			, #{qnaCategoryCd}
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+			, #{userCode}
+			, 'G' || LPAD(GROUP_SEQ.NEXTVAL, 6, 0)
+			)
+		]]>
+	</insert>
+	
+		<insert id="createResponse" parameterType="qna">
+		<![CDATA[
+		/*	createBoard	*/
+			INSERT INTO TB_QNA(
+			  QNA_NO
+			, USER_CODE
+			, QNA_TITLE
+			, QNA_CONTENTS
+			, QNA_DATE
+			, RESPONSE_USER
+			, QNA_DEPTH
+			, GROUP_NO
+			) VALUES (
+			  'Q' || LPAD(BOARD_SEQ.NEXTVAL, 6, 0)
+			, #{userCode}
+			, #{qnaTitle}
+			, #{qnaContents}
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+			, #{responseUser}
+			, #{qnaDepth}+1
+			, #{groupNo}
+			)
+		]]>
+	</insert>
+	
+	<delete id="deleteQna" parameterType="map">
+		<![CDATA[
+			DELETE
+			FROM  TB_QNA
+			WHERE GROUP_NO = #{groupNo}
+		]]>
+	</delete>
+</mapper>

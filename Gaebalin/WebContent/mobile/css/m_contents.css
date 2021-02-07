@@ -1,0 +1,42 @@
+@charset "euc-kr";
+
+/* main 페이지 layout css 적용 */
+body{background:#eeece4;word-wrap:break-word;}
+#m_wrap{margin:0 auto;}
+#m_con {width:100%;background:url(main_images/middle_bg.jpg) no-repeat right 0;}
+#m_foot{text-align:center;padding:18px 0 19px 0;}
+
+/* m_con id main_contetns */
+#m_con  h2{text-align:center;}
+#m_con  h2 img{max-width:100%;}
+#m_con .main_menu_w{width:100%;padding:6px 0 12px 0;}
+#m_con .main_menu_w ul{overflow:hidden;}
+#m_con .main_menu_w ul li {width:33%;float:left;text-align:center;margin-top:12px;}
+#m_con .main_menu_w ul li a{display:block;text-align:center;}
+#m_con .main_menu_w ul li  span.tit_l{display:block;text-align:center;margin-top:12px;}
+
+/* m_foot id main footer */
+#m_foot ul {width:285px;margin:0 auto;}
+#m_foot ul li{float:left;}
+#m_foot ul li.copyright{padding-top:6px;}
+#m_foot ul li.pc_btn {margin-left:20px;}
+#m_foot ul li.pc_btn a{color:#959595;font-size:11px;}
+#m_foot ul li.pc_btn a span{display:block;padding:4px 0;border:1px solid #e6e3dc;background:#fff;width:59px;}
+
+/* s_con id sub layout */
+#s_con {background:url(contents_images/middle_bg02.jpg) no-repeat right 0;margin:0 auto;}
+
+/* s_con id sub_contetns */
+#s_con img{max-width:100%;}
+#s_con  h2.sub_01{text-align:center;height:86px;padding-top:44px;}
+#s_con  h2.sub_02{text-align:center;height:104px;padding:26px 0 0 80px;}
+
+#s_con .name{text-align:center;}
+#s_con .group{text-align:center;}
+#s_con .group li.color01{background:#710100;margin-top:22px;}
+#s_con .group li.color02{background:#5da039;}
+#s_con .group li.color03{background:#f7941d;}
+
+/* gropu01 class, group02 class margin 적용 */
+.group01{margin-top:5px;}
+.group02{margin-top:21px;}

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				  "dtd/mybatis-3-mapper.dtd">
+<mapper namespace="product">
+	<resultMap id="productResult" type="product">
+		<result property="productCode" column="PRODUCT_CODE" />
+		<result property="productImage" column="PRODUCT_IMAGE" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="productUnitPrice" column="PRODUCT_UNIT_PRICE" />
+		<result property="productCount" column="PRODUCT_COUNT" />
+		<result property="productCategoryCd" column="PRODUCT_CATEGORY_CD" />
+		<result property="productInfo" column="PRODUCT_INFO" />
+		<result property="productDate" column="PRODUCT_DATE" />
+		<result property="productRegDate" column="PRODUCT_REG_DATE" />
+	</resultMap>
+
+	<select id="retrieveProductList" resultType="map" parameterType="map">
+		<![CDATA[
+			/*	retrieveProductList	*/
+			SELECT PRODUCT.PRODUCT_CODE
+			     , PRODUCT.PRODUCT_IMAGE
+			     , PRODUCT.PRODUCT_NAME
+			     , PRODUCT.PRODUCT_UNIT_PRICE
+			     , PRODUCT.PRODUCT_COUNT
+			     , PRODUCT_CATEGORY_CD
+			     , PRODUCT.PRODUCT_INFO
+			     , PRODUCT.PRODUCT_DATE
+			     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0101' AND COMM_CD = PRODUCT.PRODUCT_CATEGORY_CD) AS PRODUCT_CATEGORY_CD_NM
+			     , PRODUCT.PRODUCT_REG_DATE
+			     , T.RANK
+			FROM   TB_PRODUCT PRODUCT
+					LEFT OUTER JOIN 
+					(SELECT TB_PRODUCT.PRODUCT_CODE, RANK() OVER (ORDER BY SUM(SELL.SELL_COUNT) DESC) RANK
+					FROM TB_PRODUCT
+					INNER JOIN TB_SELL SELL
+					ON TB_PRODUCT.PRODUCT_CODE = SELL.PRODUCT_CODE
+					GROUP BY TB_PRODUCT.PRODUCT_CODE) T ON
+					PRODUCT.PRODUCT_CODE = T.PRODUCT_CODE
+			WHERE 1=1
+			]]>
+			<if test="category != null">
+				AND PRODUCT.PRODUCT_CATEGORY_CD = #{category}
+			</if>
+			ORDER BY PRODUCT.PRODUCT_REG_DATE DESC
+	</select>
+	
+	<select id="retrieveProductListPop" resultType="map">
+		<![CDATA[
+			/*	retrieveProductList	*/
+			SELECT PRODUCT.PRODUCT_CODE
+			     , PRODUCT.PRODUCT_IMAGE
+			     , PRODUCT.PRODUCT_NAME
+			     , PRODUCT.PRODUCT_UNIT_PRICE
+			     , PRODUCT.PRODUCT_COUNT
+			     , PRODUCT_CATEGORY_CD
+			     , PRODUCT.PRODUCT_INFO
+			     , PRODUCT.PRODUCT_DATE
+			     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0101' AND COMM_CD = PRODUCT.PRODUCT_CATEGORY_CD) AS PRODUCT_CATEGORY_CD_NM
+			     , PRODUCT.PRODUCT_REG_DATE
+			     , T.RANK
+			FROM   TB_PRODUCT PRODUCT
+					LEFT OUTER JOIN 
+					(SELECT TB_PRODUCT.PRODUCT_CODE, ROW_NUMBER() OVER (ORDER BY SUM(SELL.SELL_COUNT) DESC) RANK
+					FROM TB_PRODUCT
+					INNER JOIN TB_SELL SELL
+					ON TB_PRODUCT.PRODUCT_CODE = SELL.PRODUCT_CODE
+					GROUP BY TB_PRODUCT.PRODUCT_CODE) T ON
+					PRODUCT.PRODUCT_CODE = T.PRODUCT_CODE
+			WHERE 1=1
+			AND T.RANK <= 20
+			]]>
+			ORDER BY PRODUCT.PRODUCT_REG_DATE DESC
+	</select>
+	
+	<select id="retrieveProductPop" resultType="map">
+		<![CDATA[
+			/* retrieveProductPop */
+			SELECT PRODUCT.PRODUCT_CODE
+			     , PRODUCT.PRODUCT_IMAGE
+			     , PRODUCT.PRODUCT_NAME
+			     , PRODUCT.PRODUCT_UNIT_PRICE
+			     , PRODUCT.PRODUCT_CATEGORY_CD
+			     , T.RANK
+			FROM   TB_PRODUCT PRODUCT
+					INNER JOIN 
+					(SELECT TB_PRODUCT.PRODUCT_CODE, RANK() OVER (ORDER BY SUM(SELL.SELL_COUNT) DESC) RANK
+					FROM TB_PRODUCT
+					INNER JOIN TB_SELL SELL
+					ON TB_PRODUCT.PRODUCT_CODE = SELL.PRODUCT_CODE
+					GROUP BY TB_PRODUCT.PRODUCT_CODE) T ON
+					PRODUCT.PRODUCT_CODE = T.PRODUCT_CODE
+			WHERE ROWNUM = 1
+		]]>
+	</select>
+
+	<select id="retrieveProductListForMain" resultType="map">
+		<![CDATA[
+			/*	retrieveProductListForMain	*/
+			SELECT T.PRODUCT_IMAGE, T.PRODUCT_CATEGORY_CD
+			FROM
+			(
+			  SELECT PRODUCT_IMAGE, PRODUCT_CATEGORY_CD
+			  FROM TB_PRODUCT
+			  WHERE 1=1
+			  AND PRODUCT_CATEGORY_CD = 'JA'
+			  ORDER BY PRODUCT_REG_DATE DESC
+			) T
+			WHERE ROWNUM = 1
+			UNION ALL
+			SELECT T.PRODUCT_IMAGE, T.PRODUCT_CATEGORY_CD
+			FROM
+			(
+			  SELECT PRODUCT_IMAGE, PRODUCT_CATEGORY_CD
+			  FROM TB_PRODUCT
+			  WHERE 1=1
+			  AND PRODUCT_CATEGORY_CD = 'PY'
+			  ORDER BY PRODUCT_REG_DATE DESC
+			) T
+			WHERE ROWNUM = 1
+						UNION ALL
+			SELECT T.PRODUCT_IMAGE, T.PRODUCT_CATEGORY_CD
+			FROM
+			(
+			  SELECT PRODUCT_IMAGE, PRODUCT_CATEGORY_CD
+			  FROM TB_PRODUCT
+			  WHERE 1=1
+			  AND PRODUCT_CATEGORY_CD = 'ED'
+			  ORDER BY PRODUCT_REG_DATE DESC
+			) T
+			WHERE ROWNUM = 1
+						UNION ALL
+			SELECT T.PRODUCT_IMAGE, T.PRODUCT_CATEGORY_CD
+			FROM
+			(
+			  SELECT PRODUCT_IMAGE, PRODUCT_CATEGORY_CD
+			  FROM TB_PRODUCT
+			  WHERE 1=1
+			  AND PRODUCT_CATEGORY_CD = 'CC'
+			  ORDER BY PRODUCT_REG_DATE DESC
+			) T
+			WHERE ROWNUM = 1
+			]]>
+	</select>
+
+	<select id="retrieveProductListForJava" resultType="map">
+		<![CDATA[
+			/*	retrieveProductListForJava	*/
+			SELECT T.PRODUCT_IMAGE, T.PRODUCT_CATEGORY_CD
+			FROM
+			(
+			  SELECT PRODUCT_IMAGE, PRODUCT_CATEGORY_CD
+			  FROM TB_PRODUCT
+			  WHERE 1=1
+			  AND PRODUCT_CATEGORY_CD = 'JA'
+			  ORDER BY PRODUCT_REG_DATE DESC
+			) T
+			WHERE ROWNUM <= 4
+			]]>
+	</select>
+	
+	<select id="retrieveProduct" parameterType="map" resultType="map">
+		/*	retrieveProduct	*/
+		SELECT PRODUCT.PRODUCT_CODE
+		     , PRODUCT.PRODUCT_IMAGE
+		     , PRODUCT.PRODUCT_NAME
+		     , PRODUCT.PRODUCT_UNIT_PRICE
+		     , PRODUCT.PRODUCT_COUNT
+		     , PRODUCT.PRODUCT_CATEGORY_CD
+		     , PRODUCT.PRODUCT_INFO
+		     , PRODUCT.PRODUCT_DATE
+		     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0101' AND COMM_CD = PRODUCT.PRODUCT_CATEGORY_CD) AS PRODUCT_CATEGORY_CD_NM
+		     , PRODUCT.PRODUCT_REG_DATE
+		     , (SELECT ROUND( (SUM(MARK_RATING) / COUNT(*)), 1) FROM TB_PRODUCT_MARK WHERE 1=1 AND PRODUCT_CODE = #{productCode}) AS MARK_RATING
+		FROM   TB_PRODUCT PRODUCT
+		WHERE 1=1
+		AND  PRODUCT_CODE = #{productCode}
+	</select>
+
+
+	<update id="updateProduct" parameterType="map">
+		/*	updateProduct	*/
+		UPDATE TB_PRODUCT
+		SET PRODUCT_IMAGE       = #{productImage}
+		, PRODUCT_CATEGORY_CD  = #{productCategoryCd}
+		, PRODUCT_NAME        = #{productName}
+		, PRODUCT_UNIT_PRICE  = #{productUnitPrice}
+		, PRODUCT_COUNT       = #{productCount}
+		, PRODUCT_INFO       = #{productInfo}
+		, PRODUCT_DATE       = #{productDate}
+		WHERE 1=1
+		AND  PRODUCT_CODE = #{productCode}
+	</update>
+
+	<update id="updateProductCountMinus" parameterType="map">
+		/*	updateProductCountMinus	*/
+		UPDATE TB_PRODUCT
+		SET PRODUCT_COUNT       = PRODUCT_COUNT - #{productCount}
+		WHERE 1=1
+		AND  PRODUCT_CODE = #{productCode}
+	</update>
+
+	<update id="updateProductCountPlus" parameterType="map">
+		/*	updateProductCountPlus	*/
+		UPDATE TB_PRODUCT
+		SET PRODUCT_COUNT       = PRODUCT_COUNT + #{productCount}
+		WHERE 1=1
+		AND  PRODUCT_CODE = #{productCode}
+	</update>
+
+	<insert id="createProduct" parameterType="product">
+		<![CDATA[
+		/*	createProduct	*/
+		INSERT INTO TB_PRODUCT(
+			  PRODUCT_CODE
+			, PRODUCT_IMAGE
+			, PRODUCT_NAME
+			, PRODUCT_UNIT_PRICE
+			, PRODUCT_COUNT
+			, PRODUCT_CATEGORY_CD
+			, PRODUCT_REG_DATE
+			, PRODUCT_INFO
+			, PRODUCT_DATE
+		) VALUES (
+			  'P' || LPAD(PRODUCT_SEQ.NEXTVAL, 6, 0)
+			, #{productImage}
+			, #{productName}
+			, #{productUnitPrice}
+			, #{productCount}
+			, #{productCategoryCd}
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+			, #{productInfo}
+			, #{ProductDate}
+		)
+		]]>
+	</insert>
+
+	<select id="retrieveStatisticsForStock" resultType="map">
+		/*	retrieveStatisticsForStock	*/
+		SELECT PRODUCT_NAME, PRODUCT_COUNT
+		FROM   TB_PRODUCT
+		WHERE  1=1
+		AND    PRODUCT_CATEGORY_CD = #{productCategoryCd}
+		GROUP BY PRODUCT_NAME, PRODUCT_COUNT
+	</select>
+
+	<select id="retrieveStatisticsForSell" resultType="map">
+		/*	retrieveStatisticsForSell	*/
+		SELECT PRODUCT.PRODUCT_NAME, SELL_COUNT
+		FROM   TB_SELL SELL
+			   INNER JOIN TB_PRODUCT PRODUCT ON PRODUCT.PRODUCT_CODE = SELL.PRODUCT_CODE
+		GROUP BY PRODUCT.PRODUCT_NAME, SELL_COUNT
+	</select>
+
+</mapper>

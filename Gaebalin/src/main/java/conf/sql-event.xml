@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				  "dtd/mybatis-3-mapper.dtd">
+				  
+<mapper namespace="event">
+	<resultMap id="eventResult" type="event">
+		<result property="eventNo" column="EVENT_NO" />
+		<result property="eventImage" column="EVENT_IMAGE" />
+		<result property="eventTitle" column="EVENT_TITLE" />
+		<result property="eventUnitPrice" column="EVENT_UNIT_PRICE" />
+		<result property="eventCategoryCd" column="EVENT_CATEGORY_CD" />
+		<result property="eventContents" column="EVENT_CONTENTS" />
+		<result property="eventDate" column="EVENT_DATE" />
+		<result property="eventTimeCd" column="EVENT_TIME_CD" />
+		<result property="eventLoc" column="EVENT_LOC" />
+		<result property="eventCurPop" column="EVENT_CUR_POP" />
+		<result property="eventMaxPop" column="EVENT_MAX_POP" />
+		<result property="eventRegDate" column="EVENT_REG_DATE" />
+		<result property="eventYn" column="EVENT_YN" />
+	</resultMap>
+	
+	<select id="retrieveEventList" resultType="map" parameterType="map">
+		<![CDATA[
+			/*	retrieveEventList	*/
+			SELECT EVENT.EVENT_NO
+			     , EVENT.EVENT_IMAGE
+			     , EVENT.EVENT_TITLE
+			     , EVENT.EVENT_UNIT_PRICE
+			     , EVENT.EVENT_CONTENTS
+			     , EVENT.EVENT_TIME_CD
+			     , EVENT.EVENT_DATE
+			     , EVENT.EVENT_LOC
+			     , EVENT.EVENT_CUR_POP
+			     , EVENT.EVENT_MAX_POP
+    		     , EVENT.EVENT_YN
+			     , EVENT_CATEGORY_CD
+			     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0102' AND COMM_CD = EVENT.EVENT_CATEGORY_CD) AS EVENT_CATEGORY_CD_NM
+   			     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0103' AND COMM_CD = EVENT.EVENT_TIME_CD) AS EVENT_TIME_CD_NM
+			     , EVENT.EVENT_REG_DATE
+			FROM   TB_EVENT EVENT
+			WHERE 1=1
+			AND EVENT.EVENT_YN='Y'
+			]]>
+			<if test="category != null">
+				AND EVENT_CATEGORY_CD = #{category}
+			</if>
+			ORDER BY EVENT.EVENT_REG_DATE DESC
+	</select>
+	
+	<select id="retrieveEventMain" resultType="map">
+		<![CDATA[
+			/*	retrieveEventMain	*/
+			SELECT EVENT.EVENT_NO
+			     , EVENT.EVENT_TITLE
+			     , EVENT.EVENT_TIME_CD
+			     , EVENT.EVENT_DATE
+			     , EVENT.EVENT_CUR_POP
+			     , EVENT.EVENT_MAX_POP
+			     , EVENT_CATEGORY_CD
+			     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0102' AND COMM_CD = EVENT.EVENT_CATEGORY_CD) AS EVENT_CATEGORY_CD_NM
+   			     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0103' AND COMM_CD = EVENT.EVENT_TIME_CD) AS EVENT_TIME_CD_NM
+			FROM   TB_EVENT EVENT
+			WHERE ROWNUM < 6
+			AND EVENT.EVENT_YN='Y'
+			]]>
+			ORDER BY EVENT.EVENT_CUR_POP DESC
+	</select>
+	
+	<select id="retrieveEventListForM" resultType="map">
+		<![CDATA[
+			/*	retrieveEventListForM	*/
+			SELECT EVENT.EVENT_NO
+			     , EVENT.EVENT_IMAGE
+			     , EVENT.EVENT_TITLE
+			     , EVENT.EVENT_UNIT_PRICE
+			     , EVENT.EVENT_CONTENTS
+			     , EVENT.EVENT_TIME_CD
+			     , EVENT.EVENT_DATE
+			     , EVENT.EVENT_LOC
+			     , EVENT.EVENT_CUR_POP
+			     , EVENT.EVENT_MAX_POP
+    		     , EVENT.EVENT_YN
+			     , EVENT_CATEGORY_CD
+			     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0102' AND COMM_CD = EVENT.EVENT_CATEGORY_CD) AS EVENT_CATEGORY_CD_NM
+   			     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0103' AND COMM_CD = EVENT.EVENT_TIME_CD) AS EVENT_TIME_CD_NM
+			     , EVENT.EVENT_REG_DATE
+			FROM   TB_EVENT EVENT
+			WHERE 1=1
+			]]>
+			ORDER BY EVENT.EVENT_REG_DATE DESC
+	</select>
+
+	<select id="retrieveEvent" parameterType="map" resultType="map">
+		/*	retrieveEvent	*/
+		SELECT EVENT.EVENT_NO
+		     , EVENT.EVENT_IMAGE
+		     , EVENT.EVENT_TITLE
+		     , EVENT.EVENT_UNIT_PRICE
+		     , EVENT.EVENT_CONTENTS
+		     , EVENT.EVENT_TIME_CD
+		     , EVENT.EVENT_DATE
+		     , EVENT.EVENT_LOC
+		     , EVENT.EVENT_CUR_POP
+		     , EVENT.EVENT_MAX_POP
+		     , EVENT_CATEGORY_CD
+		     , (EVENT.EVENT_MAX_POP - EVENT.EVENT_CUR_POP) AS EVENT_COUNT
+		     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0102' AND COMM_CD = EVENT.EVENT_CATEGORY_CD) AS EVENT_CATEGORY_CD_NM
+		     , (SELECT COMM_CD_NM FROM TB_COM_CODE WHERE 1=1 AND COMM_TY_CD = 'CODE0103' AND COMM_CD = EVENT.EVENT_TIME_CD) AS EVENT_TIME_CD_NM
+		     , EVENT.EVENT_REG_DATE
+		     , (SELECT ROUND( (SUM(MARK_RATING) / COUNT(*)), 1) FROM TB_EVENT_MARK WHERE 1=1 AND EVENT_NO = #{eventNo}) AS MARK_RATING
+		FROM   TB_EVENT EVENT
+		WHERE 1=1
+		AND  EVENT_NO = #{eventNo}
+	</select>
+
+	<update id="updateEvent" parameterType="map">
+		/*	updateEvent	*/
+		UPDATE TB_EVENT
+		SET EVENT_IMAGE       = #{eventImage}
+		  , EVENT_TITLE        = #{eventTitle}
+		  , EVENT_UNIT_PRICE  = #{eventUnitPrice}
+		  , EVENT_CATEGORY_CD  = #{eventCategoryCd}
+		  , EVENT_CONTENTS   = #{eventContents}
+		  , EVENT_TIME_CD    = #{eventTimeCd}
+		  , EVENT_DATE      = #{eventDate}
+		  , EVENT_LOC       = #{eventLoc}
+		  , EVENT_CUR_POP      = #{eventCurPop}
+		  , EVENT_MAX_POP      = #{eventMaxPop}
+		WHERE 1=1
+		AND  EVENT_NO = #{eventNo}
+	</update>
+	
+	<update id="updateEventPopMinus" parameterType="map">
+		/*	updateEventPopMinus	*/
+		UPDATE TB_EVENT
+		SET EVENT_CUR_POP       = EVENT_CUR_POP - #{eventCurPop}
+		WHERE 1=1
+		AND  EVENT_NO = #{eventNo}
+	</update>
+
+	<update id="updateEventPopPlus" parameterType="map">
+		/*	updateEventPopPlus	*/
+		UPDATE TB_EVENT
+		SET EVENT_CUR_POP       = EVENT_CUR_POP + #{eventCurPop}
+		WHERE 1=1
+		AND  EVENT_NO = #{eventNo}
+	</update>
+	
+	<insert id="createEvent" parameterType="event">
+		<![CDATA[
+		/*	createEvent	*/
+		INSERT INTO TB_EVENT(
+			EVENT_NO
+			, EVENT_IMAGE
+			, EVENT_TITLE
+			, EVENT_UNIT_PRICE
+			, EVENT_CONTENTS
+			, EVENT_TIME_CD
+			, EVENT_DATE
+			, EVENT_LOC
+			, EVENT_CUR_POP
+			, EVENT_MAX_POP
+			, EVENT_CATEGORY_CD
+			, EVENT_YN
+			, EVENT_REG_DATE
+		) VALUES (
+			  'EVE' || LPAD(EVENT_SEQ.NEXTVAL, 6, 0)
+			, #{eventImage}
+			, #{eventTitle}
+			, #{eventUnitPrice}
+			, #{eventContents}
+			, #{eventTimeCd}
+			, #{eventDate}
+			, #{eventLoc}
+			, #{eventCurPop}
+			, #{eventMaxPop}
+			, #{eventCategoryCd}
+			, #{eventYn}
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+		)
+		]]>
+	</insert>
+	
+	<update id="updateEventYn" parameterType="map">
+		<![CDATA[
+			/* updateEventYn */
+			UPDATE TB_EVENT
+			SET EVENT_YN           = 'Y'
+			WHERE EVENT_NO = #{eventNo}
+		]]>
+	</update>
+</mapper>

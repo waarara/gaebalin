@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<typeAlias type="work.user.UserBean" alias="user"/>
+		<typeAlias type="work.product.ProductBean" alias="product"/>
+		<typeAlias type="work.promark.PromarkBean" alias="productmark"/>
+		<typeAlias type="work.sell.SellBean" alias="sell"/>
+		<typeAlias type="work.cart.CartBean" alias="cart"/>
+		<typeAlias type="work.proreply.ProreplyBean" alias="productreply"/>
+		<typeAlias type="work.code.CodeBean" alias="code"/>
+		<typeAlias type="work.board.BoardBean" alias="board"/>
+		<typeAlias type="work.reply.ReplyBean" alias="reply"/>
+		<typeAlias type="work.mark.MarkBean" alias="mark"/>
+		<typeAlias type="work.event.EventBean" alias="event"/>
+		<typeAlias type="work.eventmark.EventmarkBean" alias="eventmark"/>
+		<typeAlias type="work.eventreply.EventreplyBean" alias="eventreply"/>
+		<typeAlias type="work.reserve.ReserveBean" alias="reserve"/>
+		<typeAlias type="work.sche.ScheBean" alias="sche"/>
+		<typeAlias type="work.qna.QnaBean" alias="qna"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="conf/sql-user.xml" />
+		<mapper resource="conf/sql-product.xml" />
+		<mapper resource="conf/sql-productmark.xml" />
+		<mapper resource="conf/sql-sell.xml" />
+		<mapper resource="conf/sql-cart.xml" />
+		<mapper resource="conf/sql-productreply.xml" />
+		<mapper resource="conf/sql-code.xml" />
+		<mapper resource="conf/sql-board.xml" />
+		<mapper resource="conf/sql-reply.xml" />
+		<mapper resource="conf/sql-mark.xml" />
+		<mapper resource="conf/sql-event.xml" />
+		<mapper resource="conf/sql-eventmark.xml" />
+		<mapper resource="conf/sql-eventreply.xml" />
+		<mapper resource="conf/sql-reserve.xml" />
+		<mapper resource="conf/sql-sche.xml" />
+		<mapper resource="conf/sql-qna.xml" />
+	</mappers>
+</configuration>
